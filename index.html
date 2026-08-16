@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سينمائي — دليل الأفلام</title>
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700;900&display=swap');
+
+  :root{
+    --bg: #14161F;
+    --panel: #1D202B;
+    --panel-2: #23273400;
+    --gold: #C9A227;
+    --gold-dim: #8A7020;
+    --teal: #3F6864;
+    --text: #EDEAE0;
+    --muted: #9B9CAA;
+    --line: #33374499;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family:'Cairo', sans-serif;
+    min-height:100vh;
+  }
+
+  .wrap{
+    max-width: 960px;
+    margin:0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* ===== Header ===== */
+  header{
+    text-align:center;
+    margin-bottom: 40px;
+    position:relative;
+  }
+
+  .film-strip{
+    height:14px;
+    background-image: repeating-linear-gradient(90deg, var(--gold-dim) 0 8px, transparent 8px 20px);
+    opacity:.5;
+    margin-bottom: 24px;
+  }
+
+  h1{
+    font-family:'Amiri', serif;
+    font-weight:700;
+    font-size: 44px;
+    margin:0 0 6px;
+    letter-spacing: 1px;
+    color: var(--text);
+  }
+
+  .tagline{
+    color: var(--muted);
+    font-size:15px;
+    letter-spacing: 2px;
+    margin:0 0 18px;
+  }
+
+  .lang-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+  }
+  .lang-row label{
+    font-size:12.5px;
+    color: var(--muted);
+  }
+  .lang-row select{
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-family:'Cairo', sans-serif;
+    font-size:13px;
+  }
+  .lang-row select:focus{ outline:none; border-color: var(--gold-dim); }
+
+  /* ===== API key box ===== */
+  .key-box{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
+    display:none;
+  }
+  .key-box.show{ display:block; }
+  .key-box p{
+    margin:0 0 10px;
+    font-size: 14px;
+    color: var(--muted);
+    line-height:1.9;
+  }
+  .key-box a{ color: var(--gold); text-decoration:none; border-bottom:1px dashed var(--gold-dim); }
+  .key-row{ display:flex; gap:10px; }
+  .key-row input{
+    flex:1;
+    background:#12141C;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:11px 14px;
+    color:var(--text);
+    font-family:'Cairo',sans-serif;
+    font-size:14px;
+  }
+  .key-row input:focus{ outline:none; border-color:var(--gold-dim); }
+  .key-row button{
+    background: var(--gold);
+    color:#1a1a12;
+    border:none;
+    border-radius:8px;
+    padding:0 22px;
+    font-family:'Cairo',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .key-row button:hover{ background:#dbb62e; }
+
+  /* ===== Search ===== */
+  .search-box{
+    display:flex;
+    gap:10px;
+    margin-bottom: 8px;
+    position:relative;
+  }
+
+  #q{
+    flex:1;
+    background: var(--panel);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 20px;
+    color: var(--text);
+    font-family:'Cairo', sans-serif;
+    font-size: 17px;
+  }
+  #q::placeholder{ color: var(--muted); }
+  #q:focus{ outline:none; border-color: var(--gold); }
+
+  #go{
+    background: var(--gold);
+    color:#1a1a12;
+    border:none;
+    border-radius:10px;
+    padding: 0 28px;
+    font-family:'Cairo',sans-serif;
+    font-weight: 900;
+    font-size:16px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  #go:hover{ background:#dbb62e; }
+  #go:disabled{ opacity:.5; cursor:default; }
+
+  #suggest{
+    display:none;
+    position:absolute;
+    top: 58px;
+    right:0; left:0;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow:hidden;
+    z-index: 20;
+    box-shadow: 0 16px 30px -14px #00000090;
+  }
+  #suggest.show{ display:block; }
+  .sg-item{
+    display:flex; align-items:center; gap:12px;
+    padding: 9px 14px;
+    cursor:pointer;
+    border-bottom: 1px solid var(--line);
+  }
+  .sg-item:last-child{ border-bottom:none; }
+  .sg-item:hover{ background: #23273499; }
+  .sg-item img{ width:32px; height:46px; object-fit:cover; border-radius:4px; background:#0e1017; flex-shrink:0; }
+  .sg-item .sg-name{ font-size:14px; font-weight:700; }
+  .sg-item .sg-year{ font-size:12px; color: var(--muted); }
+
+  .hint{
+    font-size:13px;
+    color: var(--muted);
+    margin: 0 4px 32px;
+  }
+  .hint button{
+    background:none;border:none;color:var(--gold);cursor:pointer;
+    font-family:'Cairo',sans-serif;font-size:13px;text-decoration:underline;
+    padding:0;
+  }
+
+  /* ===== Status ===== */
+  #status{
+    text-align:center;
+    padding: 40px 0;
+    color: var(--muted);
+    font-size:15px;
+    display:none;
+  }
+  #status.show{ display:block; }
+
+  .reel{
+    width:34px;height:34px;
+    margin: 0 auto 14px;
+    border: 3px solid var(--line);
+    border-top-color: var(--gold);
+    border-radius:50%;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg);} }
+
+  /* ===== Choices (multiple search results) ===== */
+  #choices{ display:none; flex-direction:column; gap:10px; margin-bottom: 20px; }
+  #choices.show{ display:flex; }
+  .choice{
+    display:flex; align-items:center; gap:14px;
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 14px;
+    cursor:pointer;
+    text-align:right;
+  }
+  .choice:hover{ border-color: var(--gold-dim); }
+  .choice img{ width:40px; border-radius:4px; }
+  .choice .cname{ font-weight:700; font-size:15px; }
+  .choice .cyear{ color:var(--muted); font-size:13px; }
+
+  .group-choice{ border-color: var(--gold-dim); }
+  .group-choice .cyear{ color: var(--gold); }
+
+  .group-back{
+    color: var(--muted);
+    font-size:13px;
+    cursor:pointer;
+    padding: 4px 2px 4px;
+  }
+  .group-back:hover{ color: var(--gold); }
+
+  /* ===== Ticket card (signature element) ===== */
+  #result{ display:none; }
+  #result.show{ display:block; }
+
+  .ticket{
+    background: var(--panel);
+    border-radius: 14px;
+    overflow: visible;
+    display:flex;
+    position:relative;
+    box-shadow: 0 20px 40px -20px #00000090;
+  }
+
+  .ticket-poster{
+    width: 200px;
+    flex-shrink:0;
+    background-size:cover;
+    background-position:center;
+    border-radius: 14px 0 0 14px;
+    background-color:#0e1017;
+  }
+
+  .perforation{
+    width: 0;
+    position:relative;
+    border-right: 2px dashed var(--line);
+  }
+  .perforation::before, .perforation::after{
+    content:"";
+    position:absolute;
+    width:22px; height:22px;
+    background: var(--bg);
+    border-radius:50%;
+    right: -12px;
+  }
+  .perforation::before{ top:-11px; }
+  .perforation::after{ bottom:-11px; }
+
+  .ticket-body{
+    padding: 26px 30px;
+    flex:1;
+    min-width:0;
+  }
+
+  .ticket-eyebrow{
+    font-size:12px;
+    letter-spacing:3px;
+    color: var(--gold);
+    margin:0 0 8px;
+  }
+
+  .ticket-title{
+    font-family:'Amiri', serif;
+    font-size: 30px;
+    font-weight:700;
+    margin: 0 0 4px;
+    line-height:1.3;
+  }
+
+  .ticket-sub{
+    color: var(--muted);
+    font-size:14px;
+    margin: 0 0 20px;
+  }
+
+  .meta-row{
+    display:flex; gap:28px; flex-wrap:wrap;
+    margin-bottom: 22px;
+    padding-bottom: 20px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .meta-item .m-label{ font-size:11px; color: var(--muted); letter-spacing:1.5px; margin-bottom:4px;}
+  .meta-item .m-value{ font-size:15px; font-weight:700; }
+
+  .cast-title{
+    font-family:'Amiri', serif;
+    font-size:18px;
+    margin: 0 0 14px;
+    color: var(--gold);
+  }
+
+  .cast-list{ display:flex; flex-direction:column; gap:12px; }
+
+  .cast-row{
+    display:flex; align-items:center; gap:12px;
+  }
+  .cast-row img{
+    width:44px; height:44px; border-radius:50%;
+    object-fit:cover; flex-shrink:0;
+    background:#0e1017;
+    border: 1.5px solid var(--line);
+  }
+  .cast-info{ flex:1; min-width:0; }
+  .cast-name{ font-size:14.5px; font-weight:700; }
+  .cast-age{ font-size:12.5px; color: var(--muted); }
+  .cast-social{ display:flex; gap:10px; flex-shrink:0; }
+  .cast-social a{
+    font-size:12px; color: var(--teal);
+    text-decoration:none;
+    border:1px solid var(--line);
+    padding:4px 10px;
+    border-radius:20px;
+  }
+  .cast-social a:hover{ border-color: var(--teal); }
+  .cast-social .none{ font-size:12px; color:#5c5d68; }
+
+  .overview{
+    font-size:14.5px;
+    line-height:2;
+    color: var(--text);
+    margin: 0 0 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px dashed var(--line);
+  }
+
+  .gallery-title{
+    font-family:'Amiri', serif;
+    font-size:18px;
+    margin: 0 0 14px;
+    color: var(--gold);
+  }
+  .gallery{
+    display:flex;
+    gap:10px;
+    overflow-x:auto;
+    padding-bottom: 22px;
+    margin-bottom: 22px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .gallery img{
+    height: 110px;
+    border-radius: 8px;
+    flex-shrink:0;
+    background:#0e1017;
+  }
+
+  .parts-list{
+    display:flex;
+    gap:10px;
+    overflow-x:auto;
+    padding-bottom: 22px;
+    margin-bottom: 22px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .part-item{
+    flex-shrink:0;
+    width:86px;
+    text-align:center;
+  }
+  .part-item img{
+    width:86px; height:126px;
+    object-fit:cover;
+    border-radius:6px;
+    background:#0e1017;
+    border: 2px solid transparent;
+  }
+  .part-item.current img{ border-color: var(--gold); }
+  .part-item .p-name{ font-size:11px; margin-top:6px; color: var(--muted); line-height:1.4; }
+  .part-item.current .p-name{ color: var(--gold); font-weight:700; }
+
+  .cast-parts{ font-size:11.5px; color: var(--teal); margin-top:2px; }
+  .cast-parts .missing{ color:#6d6e78; }
+
+  #error{
+    display:none;
+    text-align:center;
+    color: var(--muted);
+    padding: 40px 0;
+    font-size:15px;
+  }
+  #error.show{ display:block; }
+
+  @media (max-width: 640px){
+    .ticket{ flex-direction:column; }
+    .ticket-poster{ width:100%; height:260px; border-radius:14px 14px 0 0; }
+    .perforation{ display:none; }
+    h1{ font-size:32px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="film-strip"></div>
+    <h1>سينمائي</h1>
+    <p class="tagline">اكتب اسم الفيلم، وتعرّف على كل ما يخصه</p>
+    <div class="lang-row">
+      <label for="lang">لغة البيانات</label>
+      <select id="lang">
+        <option value="ar">العربية</option>
+        <option value="en-US">English</option>
+        <option value="zh-CN">中文</option>
+        <option value="fr-FR">Français</option>
+        <option value="es-ES">Español</option>
+        <option value="tr-TR">Türkçe</option>
+      </select>
+    </div>
+  </header>
+
+  <div class="search-box">
+    <input type="text" id="q" placeholder="اسم الفيلم... مثال: Inception" autocomplete="off">
+    <button id="go">بحث</button>
+    <div id="suggest"></div>
+  </div>
+  <p class="hint">تعمل البيانات عبر TMDB</p>
+
+  <div id="choices"></div>
+
+  <div id="status">
+    <div class="reel"></div>
+    <span id="statusText">جاري البحث...</span>
+  </div>
+
+  <div id="error"></div>
+
+  <div id="result"></div>
+
+</div>
+
+<script>
+let currentLang = 'ar';
+const IMG = 'https://image.tmdb.org/t/p/w500';
+const IMG_SMALL = 'https://image.tmdb.org/t/p/w185';
+
+async function tmdb(path, params = {}){
+  const qs = new URLSearchParams(params).toString();
+  return fetch(`/api/tmdb?path=${encodeURIComponent(path)}${qs ? '&' + qs : ''}`);
+}
+
+const els = {
+  lang: document.getElementById('lang'),
+  q: document.getElementById('q'),
+  go: document.getElementById('go'),
+  suggest: document.getElementById('suggest'),
+  choices: document.getElementById('choices'),
+  status: document.getElementById('status'),
+  statusText: document.getElementById('statusText'),
+  error: document.getElementById('error'),
+  result: document.getElementById('result'),
+};
+
+els.lang.onchange = () => { currentLang = els.lang.value; };
+
+els.go.onclick = doSearch;
+els.q.addEventListener('keydown', e => { if(e.key === 'Enter'){ hideSuggest(); doSearch(); } });
+
+let suggestTimer = null;
+els.q.addEventListener('input', () => {
+  const query = els.q.value.trim();
+  clearTimeout(suggestTimer);
+  if(query.length < 2){ hideSuggest(); return; }
+  suggestTimer = setTimeout(() => fetchSuggestions(query), 350);
+});
+document.addEventListener('click', e => {
+  if(!els.suggest.contains(e.target) && e.target !== els.q) hideSuggest();
+});
+
+function hideSuggest(){
+  els.suggest.classList.remove('show');
+  els.suggest.innerHTML = '';
+}
+
+async function fetchSuggestions(query){
+  try{
+    const res = await tmdb('/search/movie', { language: currentLang, query });
+    if(!res.ok) return;
+    const data = await res.json();
+    if(!data.results || data.results.length === 0){ hideSuggest(); return; }
+    renderSuggestions(data.results.slice(0, 6));
+  } catch(e){ /* ignore live-typing errors silently */ }
+}
+
+function renderSuggestions(list){
+  els.suggest.innerHTML = list.map(m => {
+    const year = m.release_date ? m.release_date.slice(0,4) : '—';
+    const poster = m.poster_path ? IMG_SMALL + m.poster_path : '';
+    return `
+      <div class="sg-item" data-id="${m.id}">
+        ${poster ? `<img src="${poster}">` : `<div style="width:32px;height:46px;background:#0e1017;border-radius:4px;"></div>`}
+        <div>
+          <div class="sg-name">${m.title}</div>
+          <div class="sg-year">${year}</div>
+        </div>
+      </div>`;
+  }).join('');
+  els.suggest.classList.add('show');
+  els.suggest.querySelectorAll('.sg-item').forEach(item => {
+    item.onclick = () => {
+      els.q.value = item.querySelector('.sg-name').textContent;
+      hideSuggest();
+      loadMovie(item.dataset.id);
+    };
+  });
+}
+
+function reset(){
+  hideSuggest();
+  els.choices.classList.remove('show'); els.choices.innerHTML = '';
+  els.error.classList.remove('show'); els.error.innerHTML = '';
+  els.result.classList.remove('show'); els.result.innerHTML = '';
+}
+function setStatus(on, text){
+  els.status.classList.toggle('show', on);
+  if(text) els.statusText.textContent = text;
+}
+function showError(msg){
+  els.error.classList.add('show');
+  els.error.textContent = msg;
+}
+
+async function doSearch(){
+  const query = els.q.value.trim();
+  if(!query) return;
+  if(window.va) window.va('event', { name: 'search_performed' });
+
+  reset();
+  setStatus(true, 'جاري البحث عن الفيلم...');
+  els.go.disabled = true;
+
+  try{
+    const res = await tmdb('/search/movie', { language: currentLang, query });
+    if(res.status === 500){ throw new Error('SERVER_KEY'); }
+    const data = await res.json();
+    setStatus(false);
+    els.go.disabled = false;
+
+    if(!data.results || data.results.length === 0){
+      showError('لم يتم العثور على أي فيلم بهذا الاسم');
+      return;
+    }
+
+    if(data.results.length === 1){
+      loadMovie(data.results[0].id);
+    } else {
+      await renderGroupedChoices(data.results.slice(0, 8));
+    }
+  } catch(err){
+    setStatus(false);
+    els.go.disabled = false;
+    if(err.message === 'SERVER_KEY'){
+      showError('حدث خطأ في إعداد السيرفر، تواصل مع مالك الموقع');
+    } else {
+      showError('حدث خطأ أثناء الاتصال، حاول مرة أخرى');
+    }
+  }
+}
+
+async function renderGroupedChoices(list){
+  setStatus(true, 'جاري تنظيم النتائج...');
+  els.go.disabled = true;
+
+  const withCollection = await Promise.all(list.map(async m => {
+    try{
+      const res = await tmdb(`/movie/${m.id}`, { language: currentLang });
+      const d = await res.json();
+      return { ...m, belongs_to_collection: d.belongs_to_collection || null };
+    } catch(e){
+      return { ...m, belongs_to_collection: null };
+    }
+  }));
+
+  setStatus(false);
+  els.go.disabled = false;
+
+  const groups = new Map();
+  const standalone = [];
+  withCollection.forEach(m => {
+    if(m.belongs_to_collection){
+      const cid = m.belongs_to_collection.id;
+      if(!groups.has(cid)) groups.set(cid, { name: m.belongs_to_collection.name, movies: [] });
+      groups.get(cid).movies.push(m);
+    } else {
+      standalone.push(m);
+    }
+  });
+
+  els.choices.classList.add('show');
+  els.choices.innerHTML = '';
+
+  groups.forEach((group, cid) => {
+    const sorted = group.movies.sort((a,b) => (a.release_date||'') > (b.release_date||'') ? 1 : -1);
+    const years = sorted.map(m => m.release_date ? m.release_date.slice(0,4) : '؟');
+    const yearRange = years.length > 1 ? `${years[0]} – ${years[years.length-1]}` : years[0];
+    const poster = sorted[0].poster_path ? IMG_SMALL + sorted[0].poster_path : '';
+    const div = document.createElement('div');
+    div.className = 'choice group-choice';
+    div.innerHTML = `
+      ${poster ? `<img src="${poster}">` : `<div style="width:40px;height:56px;background:#0e1017;border-radius:4px;"></div>`}
+      <div>
+        <div class="cname">${group.name}</div>
+        <div class="cyear">سلسلة · ${sorted.length} أجزاء · ${yearRange}</div>
+      </div>`;
+    div.onclick = () => renderCollectionParts(cid, group.name);
+    els.choices.appendChild(div);
+  });
+
+  standalone.forEach(m => {
+    const year = m.release_date ? m.release_date.slice(0,4) : '—';
+    const poster = m.poster_path ? IMG_SMALL + m.poster_path : '';
+    const div = document.createElement('div');
+    div.className = 'choice';
+    div.innerHTML = `
+      ${poster ? `<img src="${poster}">` : `<div style="width:40px;height:56px;background:#0e1017;border-radius:4px;"></div>`}
+      <div>
+        <div class="cname">${m.title}</div>
+        <div class="cyear">${year}</div>
+      </div>`;
+    div.onclick = () => { els.choices.classList.remove('show'); loadMovie(m.id); };
+    els.choices.appendChild(div);
+  });
+}
+
+async function renderCollectionParts(collectionId, groupName){
+  setStatus(true, 'جاري جلب أجزاء السلسلة...');
+  els.choices.classList.remove('show');
+
+  try{
+    const res = await tmdb(`/collection/${collectionId}`, { language: currentLang });
+    const data = await res.json();
+    setStatus(false);
+
+    const sorted = [...(data.parts || [])].sort((a,b) => (a.release_date||'') > (b.release_date||'') ? 1 : -1);
+
+    els.choices.classList.add('show');
+    els.choices.innerHTML = `<div class="group-back" id="backToGroups">‹ رجوع لكل النتائج</div>`;
+    document.getElementById('backToGroups').onclick = () => doSearch();
+
+    sorted.forEach(p => {
+      const year = p.release_date ? p.release_date.slice(0,4) : '—';
+      const poster = p.poster_path ? IMG_SMALL + p.poster_path : '';
+      const div = document.createElement('div');
+      div.className = 'choice';
+      div.innerHTML = `
+        ${poster ? `<img src="${poster}">` : `<div style="width:40px;height:56px;background:#0e1017;border-radius:4px;"></div>`}
+        <div>
+          <div class="cname">${p.title}</div>
+          <div class="cyear">${year}</div>
+        </div>`;
+      div.onclick = () => { els.choices.classList.remove('show'); loadMovie(p.id); };
+      els.choices.appendChild(div);
+    });
+  } catch(e){
+    setStatus(false);
+    showError('تعذر جلب أجزاء السلسلة');
+  }
+}
+
+function calcAge(birthday, deathday){
+  if(!birthday) return null;
+  const end = deathday ? new Date(deathday) : new Date();
+  const b = new Date(birthday);
+  let age = end.getFullYear() - b.getFullYear();
+  const m = end.getMonth() - b.getMonth();
+  if(m < 0 || (m === 0 && end.getDate() < b.getDate())) age--;
+  return age;
+}
+
+async function loadMovie(id){
+  reset();
+  setStatus(true, 'جاري جلب تفاصيل الفيلم والممثلين...');
+
+  try{
+    const [detailsRes, creditsRes, imagesRes] = await Promise.all([
+      tmdb(`/movie/${id}`, { language: currentLang }),
+      tmdb(`/movie/${id}/credits`, { language: currentLang }),
+      tmdb(`/movie/${id}/images`, {}),
+    ]);
+    const details = await detailsRes.json();
+    const credits = await creditsRes.json();
+    const images = await imagesRes.json();
+
+    let overview = details.overview;
+    if(!overview){
+      try{
+        const enRes = await tmdb(`/movie/${id}`, { language: 'en-US' });
+        const enData = await enRes.json();
+        overview = enData.overview;
+      } catch(e){}
+    }
+    details.overview = overview;
+
+    let collection = null;
+    if(details.belongs_to_collection){
+      try{
+        const colRes = await tmdb(`/collection/${details.belongs_to_collection.id}`, { language: currentLang });
+        collection = await colRes.json();
+      } catch(e){}
+    }
+
+    const topCast = (credits.cast || []).slice(0, 6);
+
+    const castDetails = await Promise.all(topCast.map(async actor => {
+      try{
+        const calls = [
+          tmdb(`/person/${actor.id}`, {}),
+          tmdb(`/person/${actor.id}/external_ids`, {}),
+        ];
+        if(collection) calls.push(tmdb(`/person/${actor.id}/movie_credits`, {}));
+        const results = await Promise.all(calls);
+        const person = await results[0].json();
+        const ext = await results[1].json();
+        let partsIn = null, partsMissing = null;
+        if(collection){
+          const movieCredits = await results[2].json();
+          const playedIds = new Set((movieCredits.cast || []).map(c => c.id));
+          const collectionIds = new Set(collection.parts.map(p => p.id));
+          partsIn = collection.parts.filter(p => playedIds.has(p.id));
+          partsMissing = collection.parts.filter(p => !playedIds.has(p.id) && collectionIds.has(p.id));
+        }
+        return { actor, person, ext, partsIn, partsMissing };
+      } catch(e){
+        return { actor, person: {}, ext: {}, partsIn: null, partsMissing: null };
+      }
+    }));
+
+    setStatus(false);
+    renderResult(details, castDetails, images, collection);
+  } catch(err){
+    setStatus(false);
+    showError('تعذر جلب تفاصيل الفيلم، حاول مرة أخرى');
+  }
+}
+
+function renderResult(m, castDetails, images, collection){
+  const poster = m.poster_path ? IMG + m.poster_path : '';
+  const releaseDate = m.release_date || null;
+  const year = releaseDate ? releaseDate.slice(0,4) : '—';
+  const dateFormatted = releaseDate
+    ? new Date(releaseDate).toLocaleDateString(currentLang, { year:'numeric', month:'long', day:'numeric' })
+    : 'غير معروف';
+  const runtime = m.runtime ? `${m.runtime} دقيقة` : '—';
+  const rating = m.vote_average ? m.vote_average.toFixed(1) : '—';
+  const genres = (m.genres || []).map(g => g.name).join('، ') || '—';
+
+  let sortedParts = [];
+  let partNumber = null;
+  if(collection && collection.parts){
+    sortedParts = [...collection.parts].sort((a,b) => (a.release_date||'9999') > (b.release_date||'9999') ? 1 : -1);
+    partNumber = sortedParts.findIndex(p => p.id === m.id) + 1;
+  }
+
+  const castHTML = castDetails.map(({actor, person, ext, partsIn, partsMissing}) => {
+    const age = calcAge(person.birthday, person.deathday);
+    const ageLabel = person.deathday
+      ? `توفي عن عمر ${age} سنة`
+      : (age !== null ? `${age} سنة` : 'العمر غير معروف');
+    const photo = actor.profile_path ? IMG_SMALL + actor.profile_path : '';
+
+    const socials = [];
+    if(ext.twitter_id) socials.push(`<a href="https://twitter.com/${ext.twitter_id}" target="_blank">X</a>`);
+    if(ext.instagram_id) socials.push(`<a href="https://instagram.com/${ext.instagram_id}" target="_blank">إنستغرام</a>`);
+    if(ext.facebook_id) socials.push(`<a href="https://facebook.com/${ext.facebook_id}" target="_blank">فيسبوك</a>`);
+    const socialHTML = socials.length ? socials.join('') : `<span class="none">لا توجد حسابات</span>`;
+
+    let partsHTML = '';
+    if(partsIn && sortedParts.length > 1){
+      const inNames = partsIn.map(p => {
+        const idx = sortedParts.findIndex(sp => sp.id === p.id) + 1;
+        return `الجزء ${idx}`;
+      }).join('، ');
+      partsHTML = `<div class="cast-parts">ظهر في: ${inNames || '—'}`;
+      if(partsMissing && partsMissing.length){
+        const missNames = partsMissing.map(p => {
+          const idx = sortedParts.findIndex(sp => sp.id === p.id) + 1;
+          return `الجزء ${idx}`;
+        }).join('، ');
+        partsHTML += ` <span class="missing">· لم يظهر في: ${missNames}</span>`;
+      }
+      partsHTML += `</div>`;
+    }
+
+    return `
+      <div class="cast-row">
+        ${photo ? `<img src="${photo}">` : `<div style="width:44px;height:44px;border-radius:50%;background:#0e1017;"></div>`}
+        <div class="cast-info">
+          <div class="cast-name">${actor.name}${actor.character ? ' — دور ' + actor.character : ''}</div>
+          <div class="cast-age">${ageLabel}</div>
+          ${partsHTML}
+        </div>
+        <div class="cast-social">${socialHTML}</div>
+      </div>`;
+  }).join('');
+
+  const partsListHTML = sortedParts.length > 1 ? `
+    <h3 class="gallery-title">أجزاء السلسلة${partNumber ? ` — هذا الجزء ${partNumber} من ${sortedParts.length}` : ''}</h3>
+    <div class="parts-list">
+      ${sortedParts.map(p => {
+        const py = p.release_date ? p.release_date.slice(0,4) : '—';
+        const pposter = p.poster_path ? IMG_SMALL + p.poster_path : '';
+        const isCurrent = p.id === m.id;
+        return `
+          <div class="part-item ${isCurrent ? 'current' : ''}">
+            ${pposter ? `<img src="${pposter}">` : `<div style="width:86px;height:126px;background:#0e1017;border-radius:6px;"></div>`}
+            <div class="p-name">${p.title} (${py})</div>
+          </div>`;
+      }).join('')}
+    </div>` : '';
+
+  els.result.innerHTML = `
+    <div class="ticket">
+      <div class="ticket-poster" style="background-image:url('${poster}')"></div>
+      <div class="perforation"></div>
+      <div class="ticket-body">
+        <p class="ticket-eyebrow">تذكرة عرض</p>
+        <h2 class="ticket-title">${m.title}</h2>
+        <p class="ticket-sub">${m.original_title !== m.title ? m.original_title + ' · ' : ''}${genres}</p>
+
+        <div class="meta-row">
+          <div class="meta-item">
+            <div class="m-label">تاريخ العرض</div>
+            <div class="m-value">${dateFormatted}</div>
+          </div>
+          <div class="meta-item">
+            <div class="m-label">سنة الإنتاج</div>
+            <div class="m-value">${year}</div>
+          </div>
+          <div class="meta-item">
+            <div class="m-label">المدة</div>
+            <div class="m-value">${runtime}</div>
+          </div>
+          <div class="meta-item">
+            <div class="m-label">التقييم</div>
+            <div class="m-value">${rating} / 10</div>
+          </div>
+        </div>
+
+        ${m.overview ? `<p class="overview">${m.overview}</p>` : ''}
+
+        ${(images && images.backdrops && images.backdrops.length) ? `
+        <h3 class="gallery-title">صور ترويجية</h3>
+        <div class="gallery">
+          ${images.backdrops.slice(0, 8).map(b => `<img src="${IMG_SMALL}${b.file_path}">`).join('')}
+        </div>` : ''}
+
+        ${partsListHTML}
+
+        <h3 class="cast-title">الممثلون</h3>
+        <div class="cast-list">${castHTML || '<span class="none">لا توجد بيانات ممثلين</span>'}</div>
+      </div>
+    </div>`;
+  els.result.classList.add('show');
+}
+</script>
+</body>
+</html>
